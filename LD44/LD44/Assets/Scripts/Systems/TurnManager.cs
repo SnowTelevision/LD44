@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 /// <summary>
 /// Manage turn-based logic
@@ -9,8 +10,16 @@ using UnityEngine.EventSystems;
 /// </summary>
 public class TurnManager : MonoBehaviour
 {
+    public GameObject playerTurnTip; // UI text shows now is player's turn
+    public GameObject playerSelectUnitTip; // UI text shows player should select an unit
+    public GameObject playerMoveTip; // UI text shows player can move the selected unit
+    public GameObject playerActTip; // UI text shows player should act the unit that just moved
+    public GameObject reproductionPhaseTip; // UI text shows now is reproduction phase
+    public GameObject chooseNewClonePositionTip; // UI shows need to choose position for new clone when a unit is ready to reproduce
+    public GameObject enemyTurnTip; // UI shows now is enemy turn
+    //public GameObject evolvePhaseTip; // UI shows now is evolve phase when each level is done
 
-
+    public GridTileInfo currentMouseOverTile; // The grid tile that is currently under player mouse cursor
     public static bool playerTurn; // Is now player's turn
     public static bool inPlayerUnitAnimation; // Is a player unit currently in animation
     public static bool playerUnitAct; // Has the player moved a unit and should choose what the unit should do
@@ -33,17 +42,72 @@ public class TurnManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        ControlTurnTips(); // Update different UI tips about game phase
+
+        // Player input
+        currentMouseOverTile = null; // Clear the last hovered tile
+
         // If the player cursor is not on UI element
         if (!EventSystem.current.IsPointerOverGameObject())
         {
-
-
-            // If the player clicked LMB
-
-            if (Input.GetMouseButtonDown(0))
+            // If the player cursor is on a tile
+            RaycastHit hit;
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity))
             {
-
+                // Debug.Log(hit.collider.tag);
+                if (hit.collider.tag == "Tile")
+                {
+                    currentMouseOverTile = hit.collider.GetComponent<GridTileInfo>();
+                }
             }
+
+            // If the player cursor is on a tile
+            if (currentMouseOverTile != null)
+            {
+                PlayerHoverTile(currentMouseOverTile);
+
+                // If the player clicked LMB on hovering tile
+                if (Input.GetMouseButtonDown(0))
+                {
+                    PlayerSelectedTile(currentMouseOverTile);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Control the UI tips tell player what to do
+    /// </summary>
+    public void ControlTurnTips()
+    {
+
+        UpdateTurnTip(playerTurnTip, playerTurn);
+
+        UpdateTurnTip(playerSelectUnitTip, (playerTurn && currentSelectedUnitTile == null));
+
+        UpdateTurnTip(playerMoveTip, (playerTurn && currentSelectedUnitTile != null && currentSelectedUnitTile.GetComponent<PlayerUnit>()));
+
+        UpdateTurnTip(playerActTip, playerUnitAct);
+
+        //UpdateTurnTip(reproductionPhaseTip, (!playerTurn && );
+
+        UpdateTurnTip(chooseNewClonePositionTip, playerUnitReproducing);
+
+        //UpdateTurnTip(enemyTurnTip, (!playerTurn);
+
+        //UpdateTurnTip(evolvePhaseTip, GameManager.inEvolvePhase);
+    }
+
+    /// <summary>
+    /// Update a turn tip based on current turn phase
+    /// </summary>
+    /// <param name="tip"></param>
+    /// <param name="state"></param>
+    public void UpdateTurnTip(GameObject tip, bool state)
+    {
+        if (tip.activeInHierarchy != state)
+        {
+            tip.SetActive(state);
         }
     }
 
@@ -52,9 +116,7 @@ public class TurnManager : MonoBehaviour
     /// </summary>
     public void StartNewRound()
     {
-        UpdateReproducingPlayerUnits(); // Update the reproducing clones
-
-        playerTurn = true; // Let player play the turn
+        StartCoroutine(UpdateReproducingPlayerUnits()); // Update the reproducing clones
     }
 
     /// <summary>
@@ -62,8 +124,16 @@ public class TurnManager : MonoBehaviour
     /// </summary>
     public IEnumerator UpdateReproducingPlayerUnits()
     {
+        reproductionPhaseTip.SetActive(true); // Show reproduction phase UI tip
+
         foreach (PlayerUnit p in GameManager.playerUnits)
         {
+            // Wait if there is a player unit currently ready to reproduce
+            while (playerUnitReproducing)
+            {
+                yield return null;
+            }
+
             yield return new WaitForSeconds(p.moveAnimationInterval);
 
             // Focus cam on reproducing unit
@@ -81,6 +151,9 @@ public class TurnManager : MonoBehaviour
                 }
             }
         }
+
+        reproductionPhaseTip.SetActive(false); // Hide reproduction phase UI tip
+        playerTurn = true; // Let player play the turn
     }
 
     /// <summary>
@@ -92,6 +165,20 @@ public class TurnManager : MonoBehaviour
         // Player cannot select tile when it's not player's turn
         if (!playerTurn)
         {
+            // If there is a player unit ready to reproduce
+            if (playerUnitReproducing)
+            {
+                // Clear previous map marks
+                bool[] clearFlags = { false, true };
+                ClearMapMarks(clearFlags);
+
+                // If the hovered tile is valid for place new clone
+                if (hoverTile.marks[0].activeInHierarchy)
+                {
+                    hoverTile.marks[1].SetActive(true); // Highlight hovering tile
+                }
+            }
+
             return;
         }
 
@@ -145,8 +232,8 @@ public class TurnManager : MonoBehaviour
     /// <param name="selectedTile"></param>
     public void PlayerSelectedTile(GridTileInfo selectedTile)
     {
-        // Player cannot select tile when it's not player's turn or during an unit animation
-        if (!playerTurn || inPlayerUnitAnimation)
+        // Player cannot select tile during an unit animation
+        if (inPlayerUnitAnimation)
         {
             return;
         }
@@ -170,10 +257,18 @@ public class TurnManager : MonoBehaviour
             // If the player selected a valid tile
             if (selectedTile.marks[0].activeInHierarchy)
             {
+                inPlayerUnitAnimation = true; // Start animation
+
                 StartCoroutine(currentSelectedUnitTile.containingObject.GetComponent<PlayerUnit>().UnitReproduce(selectedTile));
             }
 
             // Stop player from doing other things before finish the reproduction phase
+            return;
+        }
+
+        // Player cannot select tile when it's not player's turn
+        if (!playerTurn)
+        {
             return;
         }
 
@@ -207,6 +302,8 @@ public class TurnManager : MonoBehaviour
 
                 if (path != null)
                 {
+                    inPlayerUnitAnimation = true; // Start animation
+
                     // Start move player unit
                     StartCoroutine(currentSelectedUnitTile.containingObject.GetComponent<PlayerUnit>().UnitMove(path));
                 }
@@ -217,6 +314,8 @@ public class TurnManager : MonoBehaviour
             // If the player selected an enemy that's within range
             if (selectedTile.marks[0].activeInHierarchy && selectedTile.containingObject != null && selectedTile.containingObject.GetComponent<EnemyUnit>())
             {
+                inPlayerUnitAnimation = true; // Start animation
+
                 StartCoroutine(currentSelectedUnitTile.containingObject.GetComponent<PlayerUnit>().UnitAttack(selectedTile.containingObject.GetComponent<EnemyUnit>())); // Unit attack selected enemy
             }
         }
@@ -259,8 +358,21 @@ public class TurnManager : MonoBehaviour
     /// </summary>
     public void PlayerFinishTurn()
     {
-        playerTurn = false;
+        // Player cannot finish turn when an unit is still in animation
+        if (inPlayerUnitAnimation)
+        {
+            return;
+        }
 
+        playerTurn = false;
+        currentSelectedUnitTile = null;
+
+
+        // Clear map marks
+        bool[] clearFlags = { true, true };
+        ClearMapMarks(clearFlags);
+
+        enemyTurnTip.SetActive(true); // Show enemy turn UI tip
         StartCoroutine(EnemyManager.sEnemyManager.ActEnemies()); // Start enemy turn
     }
 

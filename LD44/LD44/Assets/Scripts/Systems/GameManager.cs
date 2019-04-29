@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     public GameObject evolveInterface; // The UI menu control the evolve interface
     public Transform cameraTrans; // The game camera's transform
     public GameObject pauseMenu; // The pause menu
+    public PlayerUnit gameGoal; // The example player clone that shows the goal of current game
 
     public static int playerTotalPower; // A float that estimates player's total power (include thing like player unit/health count, player upgrades, etc.)
     //public static GridTileInfo currentSelectedTile; // The map grid tile the player is currently selected (used to determine what player is doing / can do)
@@ -24,6 +25,11 @@ public class GameManager : MonoBehaviour
     public static int upgradingAbility; // The ability the player choose to upgrade
     public PlayerUnit cloneToSpend; // The player unit that's selected to be spend for evolve
 
+    public static int maxPlayerMaxHealth;
+    public static int maxPlayerMoveRange;
+    public static int maxPlayerAttackPower;
+    public static int maxPlayerAttackRange;
+
     public static GameManager sGameManager;
 
     private void OnEnable()
@@ -32,20 +38,88 @@ public class GameManager : MonoBehaviour
 
         playerUnitEvolvedMaxHealth = playerUnitInitialMaxHealth;
         playerUnitEvolvedMoveRange = playerUnitInitialMoveRange;
-        playerUnitEvolvedAttackRange = playerUnitInitialAttackRange;
         playerUnitEvolvedAttackPower = playerUnitInitialAttackPower;
+        playerUnitEvolvedAttackRange = playerUnitInitialAttackRange;
+
+        maxPlayerMaxHealth = playerUnitInitialMaxHealth + 4;
+        maxPlayerMoveRange = playerUnitInitialMoveRange + 4;
+        maxPlayerAttackPower = playerUnitInitialAttackPower + 4;
+        maxPlayerAttackRange = playerUnitInitialAttackRange + 4;
     }
 
     // Start is called before the first frame update
     void Start()
     {
-
+        StartNewGame();
     }
 
     // Update is called once per frame
     void Update()
     {
 
+    }
+
+    /// <summary>
+    /// Start a new game
+    /// </summary>
+    public void StartNewGame()
+    {
+        GetWinCondition();
+        TurnManager.playerTurn = true;
+    }
+
+    /// <summary>
+    /// Get the win condition for current game
+    /// </summary>
+    public void GetWinCondition()
+    {
+        int requiredEvolvePower = BetterRandom.betterRandom(11, 15);
+        int powerDifference = 16 - requiredEvolvePower;
+        int[] targetAbilityPowers = { 4, 4, 4, 4 };
+
+        while (powerDifference > 0)
+        {
+            int ability = BetterRandom.betterRandom(0, 3);
+
+            if (targetAbilityPowers[ability] > 0)
+            {
+                targetAbilityPowers[ability]--;
+                powerDifference--;
+            }
+        }
+
+        cloneToSpend.maxHealth = playerUnitInitialMaxHealth + targetAbilityPowers[0];
+        cloneToSpend.moveRange = playerUnitInitialMoveRange + targetAbilityPowers[1];
+        cloneToSpend.attackPower = playerUnitInitialAttackPower + targetAbilityPowers[2];
+        cloneToSpend.attackRange = playerUnitInitialAttackRange + targetAbilityPowers[3];
+        cloneToSpend.CreateCloneLook();
+        cloneToSpend.health = 0; // Hide health bar
+    }
+
+    /// <summary>
+    /// Check if player win each time player create a new clone
+    /// </summary>
+    /// <param name="newClone"></param>
+    /// <returns></returns>
+    public bool CheckWinCondition(PlayerUnit newClone)
+    {
+        if (playerUnitEvolvedMaxHealth < cloneToSpend.maxHealth ||
+            playerUnitEvolvedMoveRange < cloneToSpend.moveRange ||
+            playerUnitEvolvedAttackPower < cloneToSpend.attackPower ||
+            playerUnitEvolvedAttackRange < cloneToSpend.attackRange)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Player win
+    /// </summary>
+    public void PlayerWin()
+    {
+        print("win");
     }
 
     /// <summary>
@@ -146,6 +220,7 @@ public class GameManager : MonoBehaviour
     public void EnterEvolvePhase()
     {
         inEvolvePhase = true;
+        TurnManager.playerTurn = false;
         evolveInterface.SetActive(true); // Show evolve interface
     }
 
@@ -154,6 +229,6 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void PlayerLose()
     {
-
+        print("lose");
     }
 }

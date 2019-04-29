@@ -2,19 +2,26 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class EnemyUnit : MonoBehaviour
 {
-
     public float animationInterval; // Time wait before each animation
+    public Image healthBar; // Health UI
+    public Image healthAbility; // Health ability UI
+    public Image moveAbility; // Move range ability UI
+    public Image attackPowerAbility; // Attack power ability UI
+    public Image attackRangeAbility; // Attack range ability UI
+
     public bool isInSomeMove; // Is this enemy currently in some action, if yes then other moves should wait for it to finish
     public bool isVisible; // Is this enemy visible to the player
 
-    public int moveSpeed;
     public UnityEvent[] enemyMoves;
+    public int maxHealth; // Max initial health
     public int health; // Enemy's current health
-    public int attackRange;
+    public int moveRange;
     public int attackPower;
+    public int attackRange;
 
     private void OnEnable()
     {
@@ -30,7 +37,7 @@ public class EnemyUnit : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        healthBar.fillAmount = (float)health / (float)maxHealth;
     }
 
     /// <summary>
@@ -38,11 +45,29 @@ public class EnemyUnit : MonoBehaviour
     /// </summary>
     public void Initialize(EnemyManager.EnemyTypeInfo info)
     {
+        maxHealth = info.maxHealth;
         health = info.maxHealth;
-        moveSpeed = info.moveRange;
+        moveRange = info.moveRange;
         enemyMoves = info.enemyMoves;
-        attackRange = info.attackRange;
         attackPower = info.attackPower;
+        attackRange = info.attackRange;
+
+        // Update ability indicators
+        UpdateAbilityIndicator(healthAbility, maxHealth - EnemyManager.minEnemyMaxHealth, EnemyManager.maxEnemyMaxHealth - maxHealth);
+        UpdateAbilityIndicator(moveAbility, moveRange - EnemyManager.minEnemyMoveRange, EnemyManager.maxEnemyMoveRange - moveRange);
+        UpdateAbilityIndicator(attackPowerAbility, attackPower - EnemyManager.minEnemyAttackPower, EnemyManager.maxEnemyAttackPower - attackPower);
+        UpdateAbilityIndicator(attackRangeAbility, attackRange - EnemyManager.minEnemyAttackRange, EnemyManager.maxEnemyAttackRange - attackRange);
+    }
+
+    /// <summary>
+    /// Update an ability indicator based on unit ability's current strength and max possible strength
+    /// </summary>
+    /// <param name="mask"></param>
+    /// <param name="currentStrength"></param>
+    /// <param name="maxStrength"></param>
+    public void UpdateAbilityIndicator(Image mask, int currentStrength, int maxStrength)
+    {
+        mask.fillAmount = (float)currentStrength / (float)maxStrength;
     }
 
     /// <summary>
@@ -233,6 +258,9 @@ public class EnemyUnit : MonoBehaviour
         {
             GameManager.sGameManager.LevelFinished(); // Finish current level and enters evolve phase
         }
+
+        // Finish animation
+        TurnManager.inPlayerUnitAnimation = false;
 
         Destroy(gameObject); // Destroy object
     }

@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 7681022951344946688}
   m_Layer: 0
   m_Name: Tile
-  m_TagString: Untagged
+  m_TagString: Tile
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -130,8 +130,6 @@ GameObject:
   - component: {fileID: 3194638160765860107}
   - component: {fileID: 8410111476257625565}
   - component: {fileID: 6156718929436288468}
-  - component: {fileID: 55061699833055940}
-  - component: {fileID: 9145663993796894860}
   m_Layer: 0
   m_Name: RouteMark
   m_TagString: Untagged
@@ -198,44 +196,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!64 &55061699833055940
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2272021038244835858}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Convex: 0
-  m_CookingOptions: 14
-  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &9145663993796894860
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2272021038244835858}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 23d7f151e4d9d3f4ab52a2f7c26bd646, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  fogOfWar: {fileID: 0}
-  marks:
-  - {fileID: 0}
-  - {fileID: 0}
-  containingObject: {fileID: 0}
-  isVisible: 1
-  xCoord: 0
-  zCoord: 0
-  isObstacle: 0
-  parentTile: {fileID: 0}
-  igCost: 0
-  ihCost: 0
 --- !u!1 &9193473255035563846
 GameObject:
   m_ObjectHideFlags: 0
@@ -247,8 +207,6 @@ GameObject:
   - component: {fileID: 5496557948084020319}
   - component: {fileID: 1487498477435570313}
   - component: {fileID: 3846952664483494016}
-  - component: {fileID: 6976513964691265424}
-  - component: {fileID: 2232093118770380248}
   m_Layer: 0
   m_Name: RangeMark
   m_TagString: Untagged
@@ -315,41 +273,3 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!64 &6976513964691265424
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9193473255035563846}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Convex: 0
-  m_CookingOptions: 14
-  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &2232093118770380248
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9193473255035563846}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 23d7f151e4d9d3f4ab52a2f7c26bd646, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  fogOfWar: {fileID: 0}
-  marks:
-  - {fileID: 0}
-  - {fileID: 0}
-  containingObject: {fileID: 0}
-  isVisible: 1
-  xCoord: 0
-  zCoord: 0
-  isObstacle: 0
-  parentTile: {fileID: 0}
-  igCost: 0
-  ihCost: 0

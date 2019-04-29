@@ -57,7 +57,10 @@ public class MapManager : MonoBehaviour
             {
                 GameObject newTile = Instantiate(instance.tilePrefab, Vector3.right * i + Vector3.forward * j, instance.tilePrefab.transform.rotation);
                 newTile.transform.parent = newColumnObject.transform;
-                instance.currentMap[i, j] = newTile.GetComponent<GridTileInfo>();
+                GridTileInfo newTileInfo = newTile.GetComponent<GridTileInfo>();
+                newTileInfo.xCoord = i;
+                newTileInfo.zCoord = j;
+                instance.currentMap[i, j] = newTileInfo;
             }
         }
     }

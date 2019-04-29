@@ -12,10 +12,12 @@ public class PlayerUnit : MonoBehaviour
     public float moveAnimationInterval; // How much time wait before the unit move to next tile during the move animation
     public int biomassToReproduce; // How much biomass is needed for the clone to start reproduce
     public int reproduceTurns; // How many turns is required for the reproduction process to finish
-    public GameObject healthMark; // Represent player HP "heart"
-    public GameObject moveMark; // Represent player move range "leg"
-    public GameObject rangeMark; // Represent player attack range "bullseye"
-    public GameObject powerMark; // Represent player attack power "fist"
+    public Image healthBar; // Health UI
+    public Image healthAbility; // Health ability UI
+    public Image moveAbility; // Move range ability UI
+    public Image attackPowerAbility; // Attack power ability UI
+    public Image attackRangeAbility; // Attack range ability UI
+    public TMP_Text reproduceText; // The text shows this clone's reproduce turn
 
     public bool hasMoved; // Has this unit moved in this turn
     public int maxHealth; // Max initial health
@@ -26,7 +28,6 @@ public class PlayerUnit : MonoBehaviour
     public int gatheredBiomass; // How much biomass this clone currently own (currently only need 1, each enemy also has 1, if an enemy is killed its biomass will be given to the clone that killed it)
     public bool isReproducing; // Is this clone currently reproducing
     public int turnsLeftForReproduce; // How many turns are left for the reproduction process to finish
-    public TMP_Text healthText; // The text shows this clone's current hp
 
     private void OnEnable()
     {
@@ -42,7 +43,14 @@ public class PlayerUnit : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        healthBar.fillAmount = (float)health / (float)maxHealth; // Update health bar
 
+        // Update reproducing UI
+        TurnManager.sTurnManager.UpdateTurnTip(reproduceText.transform.parent.gameObject, isReproducing);
+        if (isReproducing)
+        {
+            reproduceText.text = turnsLeftForReproduce.ToString();
+        }
     }
 
     public void InitiateClone()
@@ -57,11 +65,26 @@ public class PlayerUnit : MonoBehaviour
     }
 
     /// <summary>
+    /// Update an ability indicator based on unit ability's current strength and max possible strength
+    /// </summary>
+    /// <param name="mask"></param>
+    /// <param name="currentStrength"></param>
+    /// <param name="maxStrength"></param>
+    public void UpdateAbilityIndicator(Image mask, int currentStrength, int maxStrength)
+    {
+        mask.fillAmount = (float)currentStrength / (float)maxStrength;
+    }
+
+    /// <summary>
     /// Create new clone body features based on current evolved abilities
     /// </summary>
     public void CreateCloneLook()
     {
-
+        // Update ability indicators
+        UpdateAbilityIndicator(healthAbility, maxHealth - GameManager.sGameManager.playerUnitInitialMaxHealth, GameManager.maxPlayerMaxHealth - maxHealth);
+        UpdateAbilityIndicator(moveAbility, moveRange - GameManager.sGameManager.playerUnitInitialMoveRange, GameManager.maxPlayerMoveRange - moveRange);
+        UpdateAbilityIndicator(attackPowerAbility, attackPower - GameManager.sGameManager.playerUnitInitialAttackPower, GameManager.maxPlayerAttackPower - attackPower);
+        UpdateAbilityIndicator(attackRangeAbility, attackRange - GameManager.sGameManager.playerUnitInitialAttackPower, GameManager.maxPlayerAttackRange - attackRange);
     }
 
     public void CloneDie()
@@ -80,7 +103,7 @@ public class PlayerUnit : MonoBehaviour
 
     public IEnumerator UnitReproduce(GridTileInfo targetTile)
     {
-        yield return null;
+        yield return new WaitForSeconds(moveAnimationInterval);
 
         GameObject newClone = Instantiate(gameObject);
 
@@ -95,9 +118,20 @@ public class PlayerUnit : MonoBehaviour
         // Clear selected tile in TurnManager;
         TurnManager.currentSelectedUnitTile = null;
 
+        yield return new WaitForSeconds(moveAnimationInterval);
+
+        // If new clone meet the win requirement
+        if (GameManager.sGameManager.CheckWinCondition(newClone.GetComponent<PlayerUnit>()))
+        {
+            GameManager.sGameManager.PlayerWin();
+        }
+
         // Finish reproduction
         TurnManager.playerUnitReproducing = false;
         isReproducing = false;
+
+        // Finish animation
+        TurnManager.inPlayerUnitAnimation = false;
     }
 
     /// <summary>
@@ -135,6 +169,9 @@ public class PlayerUnit : MonoBehaviour
         // If the enemy is still alive
         if (enemy.health > 0)
         {
+            // Finish animation
+            TurnManager.inPlayerUnitAnimation = false;
+
             TurnManager.sTurnManager.UnitFinishAct(); // Unit finish act phase
         }
         else

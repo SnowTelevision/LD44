@@ -9,20 +9,21 @@ public class EnemyManager : MonoBehaviour
 
     public float defaultWaitBeforeEnemyAct; // How long is the default time to wait before each enemy start its actions
     public List<EnemyTypeInfo> enemyTypes; // List of enemy types
+    public GameObject enemyPrefab; // Prefab for the enemy
 
     public static List<EnemyUnit> thisLevelEnemies; // A list store the enemies in the current level
     public static EnemyManager sEnemyManager;
     public static bool enemyUnitActing; // Is there an enemy unit doing its moves currently
     public static int minEnemyPower;
+    public static int minEnemyMaxHealth;
     public static int minEnemyMoveRange;
     public static int minEnemyAttackPower;
     public static int minEnemyAttackRange;
-    public static int minEnemyMaxHealth;
     public static int maxEnemyPower;
+    public static int maxEnemyMaxHealth;
     public static int maxEnemyMoveRange;
     public static int maxEnemyAttackPower;
     public static int maxEnemyAttackRange;
-    public static int maxEnemyMaxHealth;
 
     private void OnEnable()
     {
@@ -30,16 +31,16 @@ public class EnemyManager : MonoBehaviour
 
         GameManager instance = (GameManager)FindObjectOfType(typeof(GameManager));
 
+        minEnemyMaxHealth = instance.playerUnitInitialMaxHealth;
         minEnemyMoveRange = instance.playerUnitInitialMoveRange;
         minEnemyAttackPower = instance.playerUnitInitialAttackPower;
         minEnemyAttackRange = instance.playerUnitInitialAttackRange;
-        minEnemyMaxHealth = instance.playerUnitInitialMaxHealth;
         minEnemyPower = minEnemyAttackPower + minEnemyAttackRange + minEnemyMaxHealth + minEnemyMoveRange;
 
-        maxEnemyMoveRange = minEnemyMoveRange + 5;
-        maxEnemyAttackPower = minEnemyAttackPower + 5;
-        maxEnemyAttackRange = minEnemyAttackRange + 5;
-        maxEnemyMaxHealth = minEnemyMaxHealth + 5;
+        maxEnemyMaxHealth = minEnemyMaxHealth + 4;
+        maxEnemyMoveRange = minEnemyMoveRange + 4;
+        maxEnemyAttackPower = minEnemyAttackPower + 4;
+        maxEnemyAttackRange = minEnemyAttackRange + 4;
         maxEnemyPower = maxEnemyAttackPower + maxEnemyAttackRange + maxEnemyMaxHealth + maxEnemyMoveRange;
     }
 
@@ -75,10 +76,14 @@ public class EnemyManager : MonoBehaviour
         //newEnemy.Initialize(enemyTypes.Find(t => t.typeName == type));
 
         // Create an enemy with input type info
-        EnemyUnit newEnemy = new EnemyUnit();
-        newEnemy.Initialize(typeInfo);
+        GameObject newEnemy = Instantiate(enemyPrefab);
 
-        // Place the new enemy
+        newEnemy.GetComponent<EnemyUnit>().Initialize(typeInfo);
+
+        // Add new enemy to EnemyManager
+        thisLevelEnemies.Add(newEnemy.GetComponent<EnemyUnit>());
+
+        // Place new enemy on target tile
         MapManager.PlaceObject(newEnemy.transform, xCoord, zCoord);
     }
 
@@ -152,6 +157,7 @@ public class EnemyManager : MonoBehaviour
             StartCoroutine(thisLevelEnemies[i].Act());
         }
 
+        TurnManager.sTurnManager.enemyTurnTip.SetActive(true); // Hide enemy turn UI tip
         TurnManager.sTurnManager.StartNewRound(); // Start new round
     }
 
