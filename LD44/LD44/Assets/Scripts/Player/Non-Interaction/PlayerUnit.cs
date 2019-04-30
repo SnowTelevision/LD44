@@ -167,19 +167,17 @@ public class PlayerUnit : MonoBehaviour
 
         enemy.health -= attackPower; // Decrease enemy health
 
-        // If the enemy is still alive
-        if (enemy.health > 0)
-        {
-            // Finish animation
-            TurnManager.inPlayerUnitAnimation = false;
-
-            TurnManager.sTurnManager.UnitFinishAct(); // Unit finish act phase
-        }
-        else
+        // If the enemy dead
+        if (enemy.health <= 0)
         {
             enemy.EnemyDie(); // Enemy dies
             isReproducing = true; // Start reproducing
             turnsLeftForReproduce = reproduceTurns; // Start counting turns to reproduce
         }
+
+        // Finish animation
+        TurnManager.inPlayerUnitAnimation = false;
+
+        TurnManager.sTurnManager.UnitFinishAct(); // Unit finish act phase
     }
 }

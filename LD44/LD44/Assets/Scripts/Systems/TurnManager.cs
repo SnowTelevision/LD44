@@ -379,14 +379,22 @@ public class TurnManager : MonoBehaviour
         bool[] clearFlags = { true, true };
         ClearMapMarks(clearFlags);
 
-        // Zoom out camera
-        if (!GameManager.cameraZoomedOut)
+        // If there is no more enemy left in this level
+        if (EnemyManager.thisLevelEnemies.Count == 0)
         {
-            GameManager.sGameManager.ZoomCamera();
+            GameManager.sGameManager.LevelFinished(); // Finish current level and enters evolve phase
         }
+        else
+        {
+            // Zoom out camera
+            if (!GameManager.cameraZoomedOut)
+            {
+                GameManager.sGameManager.ZoomCamera();
+            }
 
-        enemyTurnTip.SetActive(true); // Show enemy turn UI tip
-        StartCoroutine(EnemyManager.sEnemyManager.ActEnemies()); // Start enemy turn
+            enemyTurnTip.SetActive(true); // Show enemy turn UI tip
+            StartCoroutine(EnemyManager.sEnemyManager.ActEnemies()); // Start enemy turn
+        }
     }
 
     /// <summary>

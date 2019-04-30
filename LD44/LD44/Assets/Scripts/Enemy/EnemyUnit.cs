@@ -253,12 +253,6 @@ public class EnemyUnit : MonoBehaviour
         GetComponent<MapObjectInfo>().currentOccupyingTile.containingObject = null; // Clear the tile it is occupying
         EnemyManager.thisLevelEnemies.Remove(this); // Remove it from the EnemyManager
 
-        // If there is no more enemy left in this level
-        if (EnemyManager.thisLevelEnemies.Count == 0)
-        {
-            GameManager.sGameManager.LevelFinished(); // Finish current level and enters evolve phase
-        }
-
         // Finish animation
         TurnManager.inPlayerUnitAnimation = false;
 
