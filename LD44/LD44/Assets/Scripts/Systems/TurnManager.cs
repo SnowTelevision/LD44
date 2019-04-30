@@ -153,6 +153,13 @@ public class TurnManager : MonoBehaviour
         }
 
         reproductionPhaseTip.SetActive(false); // Hide reproduction phase UI tip
+
+        // Make existing player units be able to move in the next turn
+        foreach (PlayerUnit p in GameManager.playerUnits)
+        {
+            p.hasMoved = false;
+        }
+
         playerTurn = true; // Let player play the turn
     }
 
