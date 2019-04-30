@@ -96,6 +96,11 @@ public class EnemyUnit : MonoBehaviour
         {
             for (int i = 0; i < moveRange; i++)
             {
+                if (moveRoute[i].containingObject != null) // If the enemy reaches target player tile
+                {
+                    break; // Stop moving
+                }
+
                 yield return new WaitForSeconds(animationInterval);
 
                 // Move unit for one tile
@@ -215,6 +220,11 @@ public class EnemyUnit : MonoBehaviour
         isInSomeMove = true; // Start enemy attack
 
         StartCoroutine(EnemyAttack(closestUnit));
+
+        while (isInSomeMove) // Wait for enemy attack
+        {
+            yield return null;
+        }
 
         EnemyManager.enemyUnitActing = false;
     }

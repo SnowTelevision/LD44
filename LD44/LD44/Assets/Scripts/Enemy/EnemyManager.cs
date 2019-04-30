@@ -157,6 +157,12 @@ public class EnemyManager : MonoBehaviour
 
             // Start next enemy's actions
             StartCoroutine(thisLevelEnemies[i].Act());
+
+            // Wait if there is an enemy unit currently executing actions
+            while (enemyUnitActing)
+            {
+                yield return null;
+            }
         }
 
         TurnManager.sTurnManager.enemyTurnTip.SetActive(false); // Hide enemy turn UI tip

@@ -57,7 +57,7 @@ public class LevelGenerator : MonoBehaviour
 
         // Get number of enemies to be generated
         int maxEnemyAmount = Mathf.Clamp(Mathf.FloorToInt(GameManager.playerTotalPower / EnemyManager.minEnemyPower), 0, emptyBorderTiles.Count);
-        int minEnemyAmount = Mathf.CeilToInt(GameManager.playerTotalPower / EnemyManager.maxEnemyPower);
+        int minEnemyAmount = Mathf.Clamp(Mathf.CeilToInt(GameManager.playerTotalPower / EnemyManager.maxEnemyPower), 1, maxEnemyAmount); // Make sure there is at least one enemy being generated
         int enemyAmount = BetterRandom.betterRandom(minEnemyAmount, maxEnemyAmount);
 
         // Get individual power for each enemy

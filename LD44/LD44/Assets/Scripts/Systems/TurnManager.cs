@@ -443,7 +443,7 @@ public class TurnManager : MonoBehaviour
         // Show route
         List<GridTileInfo> route = MapManager.sMapManager.FindPath(selectedTile, destinationTile);
 
-        if (route == null)
+        if (route == null || route.Count > currentSelectedUnitTile.containingObject.GetComponent<PlayerUnit>().moveRange)
         {
             // No valid route
         }
