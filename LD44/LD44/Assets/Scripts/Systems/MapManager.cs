@@ -23,6 +23,7 @@ public class MapManager : MonoBehaviour
     private void OnEnable()
     {
         sMapManager = this;
+        borderTiles = new List<GridTileInfo>();
     }
 
     // Start is called before the first frame update
@@ -35,6 +36,32 @@ public class MapManager : MonoBehaviour
     void Update()
     {
 
+    }
+
+    public static void NonEditorCreateMap()
+    {
+        MapManager instance = (MapManager)FindObjectOfType(typeof(MapManager));
+
+        instance.currentMap = new GridTileInfo[instance.mapSizeX, instance.mapSizeZ];
+
+        GameObject newMapObject = Instantiate(new GameObject(), Vector3.zero, Quaternion.identity);
+        newMapObject.name = "Grid";
+
+        for (int i = 0; i < instance.mapSizeX; i++)
+        {
+            GameObject newColumnObject = Instantiate(new GameObject(), newMapObject.transform);
+            newColumnObject.name = "Column_" + i.ToString();
+
+            for (int j = 0; j < instance.mapSizeZ; j++)
+            {
+                GameObject newTile = Instantiate(instance.tilePrefab, Vector3.right * i + Vector3.forward * j, instance.tilePrefab.transform.rotation);
+                newTile.transform.parent = newColumnObject.transform;
+                GridTileInfo newTileInfo = newTile.GetComponent<GridTileInfo>();
+                newTileInfo.xCoord = i;
+                newTileInfo.zCoord = j;
+                instance.currentMap[i, j] = newTileInfo;
+            }
+        }
     }
 
 #if UNITY_EDITOR

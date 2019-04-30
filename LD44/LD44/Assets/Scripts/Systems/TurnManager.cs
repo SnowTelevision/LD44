@@ -372,6 +372,12 @@ public class TurnManager : MonoBehaviour
         bool[] clearFlags = { true, true };
         ClearMapMarks(clearFlags);
 
+        // Zoom out camera
+        if (!GameManager.cameraZoomedOut)
+        {
+            GameManager.sGameManager.ZoomCamera();
+        }
+
         enemyTurnTip.SetActive(true); // Show enemy turn UI tip
         StartCoroutine(EnemyManager.sEnemyManager.ActEnemies()); // Start enemy turn
     }

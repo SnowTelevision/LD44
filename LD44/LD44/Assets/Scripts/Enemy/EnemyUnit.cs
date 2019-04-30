@@ -53,10 +53,10 @@ public class EnemyUnit : MonoBehaviour
         attackRange = info.attackRange;
 
         // Update ability indicators
-        UpdateAbilityIndicator(healthAbility, maxHealth - EnemyManager.minEnemyMaxHealth, EnemyManager.maxEnemyMaxHealth - maxHealth);
-        UpdateAbilityIndicator(moveAbility, moveRange - EnemyManager.minEnemyMoveRange, EnemyManager.maxEnemyMoveRange - moveRange);
-        UpdateAbilityIndicator(attackPowerAbility, attackPower - EnemyManager.minEnemyAttackPower, EnemyManager.maxEnemyAttackPower - attackPower);
-        UpdateAbilityIndicator(attackRangeAbility, attackRange - EnemyManager.minEnemyAttackRange, EnemyManager.maxEnemyAttackRange - attackRange);
+        UpdateAbilityIndicator(healthAbility, maxHealth - EnemyManager.minEnemyMaxHealth, EnemyManager.maxEnemyMaxHealth - EnemyManager.minEnemyMaxHealth);
+        UpdateAbilityIndicator(moveAbility, moveRange - EnemyManager.minEnemyMoveRange, EnemyManager.maxEnemyMoveRange - EnemyManager.minEnemyMoveRange);
+        UpdateAbilityIndicator(attackPowerAbility, attackPower - EnemyManager.minEnemyAttackPower, EnemyManager.maxEnemyAttackPower - EnemyManager.minEnemyAttackPower);
+        UpdateAbilityIndicator(attackRangeAbility, attackRange - EnemyManager.minEnemyAttackRange, EnemyManager.maxEnemyAttackRange - EnemyManager.minEnemyAttackRange);
     }
 
     /// <summary>
@@ -67,7 +67,7 @@ public class EnemyUnit : MonoBehaviour
     /// <param name="maxStrength"></param>
     public void UpdateAbilityIndicator(Image mask, int currentStrength, int maxStrength)
     {
-        mask.fillAmount = (float)currentStrength / (float)maxStrength;
+        mask.fillAmount = (float)(currentStrength + 1) / (float)(maxStrength + 1); // + 1 because initial strength is 1
     }
 
     /// <summary>

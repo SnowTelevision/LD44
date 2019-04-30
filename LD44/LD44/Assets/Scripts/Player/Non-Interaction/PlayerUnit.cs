@@ -72,7 +72,7 @@ public class PlayerUnit : MonoBehaviour
     /// <param name="maxStrength"></param>
     public void UpdateAbilityIndicator(Image mask, int currentStrength, int maxStrength)
     {
-        mask.fillAmount = (float)currentStrength / (float)maxStrength;
+        mask.fillAmount = (float)(currentStrength + 1) / (float)(maxStrength + 1); // + 1 because initial strength is 1
     }
 
     /// <summary>
@@ -81,10 +81,10 @@ public class PlayerUnit : MonoBehaviour
     public void CreateCloneLook()
     {
         // Update ability indicators
-        UpdateAbilityIndicator(healthAbility, maxHealth - GameManager.sGameManager.playerUnitInitialMaxHealth, GameManager.maxPlayerMaxHealth - maxHealth);
-        UpdateAbilityIndicator(moveAbility, moveRange - GameManager.sGameManager.playerUnitInitialMoveRange, GameManager.maxPlayerMoveRange - moveRange);
-        UpdateAbilityIndicator(attackPowerAbility, attackPower - GameManager.sGameManager.playerUnitInitialAttackPower, GameManager.maxPlayerAttackPower - attackPower);
-        UpdateAbilityIndicator(attackRangeAbility, attackRange - GameManager.sGameManager.playerUnitInitialAttackPower, GameManager.maxPlayerAttackRange - attackRange);
+        UpdateAbilityIndicator(healthAbility, maxHealth - GameManager.sGameManager.playerUnitInitialMaxHealth, GameManager.maxPlayerMaxHealth - GameManager.sGameManager.playerUnitInitialMaxHealth);
+        UpdateAbilityIndicator(moveAbility, moveRange - GameManager.sGameManager.playerUnitInitialMoveRange, GameManager.maxPlayerMoveRange - GameManager.sGameManager.playerUnitInitialMoveRange);
+        UpdateAbilityIndicator(attackPowerAbility, attackPower - GameManager.sGameManager.playerUnitInitialAttackPower, GameManager.maxPlayerAttackPower - GameManager.sGameManager.playerUnitInitialAttackPower);
+        UpdateAbilityIndicator(attackRangeAbility, attackRange - GameManager.sGameManager.playerUnitInitialAttackPower, GameManager.maxPlayerAttackRange - GameManager.sGameManager.playerUnitInitialAttackPower);
     }
 
     public void CloneDie()

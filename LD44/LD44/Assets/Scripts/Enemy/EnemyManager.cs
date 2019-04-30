@@ -42,6 +42,8 @@ public class EnemyManager : MonoBehaviour
         maxEnemyAttackPower = minEnemyAttackPower + 4;
         maxEnemyAttackRange = minEnemyAttackRange + 4;
         maxEnemyPower = maxEnemyAttackPower + maxEnemyAttackRange + maxEnemyMaxHealth + maxEnemyMoveRange;
+
+        thisLevelEnemies = new List<EnemyUnit>();
     }
 
     // Start is called before the first frame update

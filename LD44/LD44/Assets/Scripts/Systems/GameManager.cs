@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -13,6 +14,12 @@ public class GameManager : MonoBehaviour
     public Transform cameraTrans; // The game camera's transform
     public GameObject pauseMenu; // The pause menu
     public PlayerUnit gameGoal; // The example player clone that shows the goal of current game
+    public Vector3 cameraZoomOutPosition;
+    public float cameraZoomInDistance;
+    public float cameraMoveSpeed; // How fast the camera move
+    public GameObject playerPrefab;
+    public GameObject winUI; // UI shows player win
+    public GameObject loseUI; // UI shows player lost
 
     public static int playerTotalPower; // A float that estimates player's total power (include thing like player unit/health count, player upgrades, etc.)
     //public static GridTileInfo currentSelectedTile; // The map grid tile the player is currently selected (used to determine what player is doing / can do)
@@ -24,6 +31,7 @@ public class GameManager : MonoBehaviour
     public static bool inEvolvePhase; // Is the game currently in evolve phase where the player can choose to spend clones and evolve abilities
     public static int upgradingAbility; // The ability the player choose to upgrade
     public PlayerUnit cloneToSpend; // The player unit that's selected to be spend for evolve
+    public static bool cameraZoomedOut; // Is camera zoomed out
 
     public static int maxPlayerMaxHealth;
     public static int maxPlayerMoveRange;
@@ -45,18 +53,56 @@ public class GameManager : MonoBehaviour
         maxPlayerMoveRange = playerUnitInitialMoveRange + 4;
         maxPlayerAttackPower = playerUnitInitialAttackPower + 4;
         maxPlayerAttackRange = playerUnitInitialAttackRange + 4;
+
+        playerUnits = new List<PlayerUnit>();
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        OnEnable();
         StartNewGame();
     }
 
     // Update is called once per frame
     void Update()
     {
+        // Move camera if not zoomed out
+        if (!cameraZoomedOut)
+        {
+            cameraTrans.Translate((Vector3.right * Input.GetAxis("Horizontal") + Vector3.forward * Input.GetAxis("Vertical")) * Time.deltaTime * cameraMoveSpeed); // Move camera
+        }
 
+        // Zoom camera on RMB click
+        if (Input.GetMouseButtonDown(1))
+        {
+            ZoomCamera();
+        }
+    }
+
+    /// <summary>
+    /// Used to let player start new game
+    /// </summary>
+    public void ReloadSceneForNewGame()
+    {
+        SceneManager.LoadScene(1);
+    }
+
+    /// <summary>
+    /// Zoom in or out camera
+    /// </summary>
+    public void ZoomCamera()
+    {
+        if (cameraZoomedOut)
+        {
+            cameraZoomedOut = false;
+            cameraTrans.Translate(-Vector3.up * cameraZoomInDistance);
+        }
+        else
+        {
+            cameraZoomedOut = true;
+            cameraTrans.position = cameraZoomOutPosition;
+        }
     }
 
     /// <summary>
@@ -65,7 +111,44 @@ public class GameManager : MonoBehaviour
     public void StartNewGame()
     {
         GetWinCondition();
+        MapManager.NonEditorCreateMap();
+        MapManager.sMapManager.GetBorderTiles();
+        InitializeFirstLevel();
         TurnManager.playerTurn = true;
+    }
+
+    /// <summary>
+    /// Initialize first level when game start, create two player units and one enemy unit
+    /// </summary>
+    public void InitializeFirstLevel()
+    {
+        // Create 1st player clone
+        GameObject newClone = Instantiate(playerPrefab);
+
+        // Place new clone on target tile
+        MapManager.PlaceObject(newClone.transform, Mathf.FloorToInt(MapManager.sMapManager.mapSizeX / 2), Mathf.FloorToInt(MapManager.sMapManager.mapSizeZ / 2));
+
+        newClone.GetComponent<PlayerUnit>().InitiateClone();
+
+        // Add new clone to GameManager
+        GameManager.playerUnits.Add(newClone.GetComponent<PlayerUnit>());
+
+        // Create 2nd clone
+        newClone = Instantiate(playerPrefab);
+
+        // Place new clone on target tile
+        MapManager.PlaceObject(newClone.transform, Mathf.FloorToInt(MapManager.sMapManager.mapSizeX / 2), Mathf.FloorToInt(MapManager.sMapManager.mapSizeZ / 2) + 1);
+
+        newClone.GetComponent<PlayerUnit>().InitiateClone();
+
+        // Add new clone to GameManager
+        GameManager.playerUnits.Add(newClone.GetComponent<PlayerUnit>());
+
+        // Create enemy
+        EnemyManager.sEnemyManager.CreateEnemy(
+            EnemyManager.sEnemyManager.CreateNewEnemyType(playerUnitInitialMaxHealth + playerUnitInitialMoveRange + playerUnitInitialAttackPower + playerUnitInitialAttackRange),
+            Mathf.FloorToInt(MapManager.sMapManager.mapSizeX / 2) + playerUnitInitialMoveRange + playerUnitInitialAttackRange - 1,
+            Mathf.FloorToInt(MapManager.sMapManager.mapSizeZ / 2));
     }
 
     /// <summary>
@@ -88,12 +171,12 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        cloneToSpend.maxHealth = playerUnitInitialMaxHealth + targetAbilityPowers[0];
-        cloneToSpend.moveRange = playerUnitInitialMoveRange + targetAbilityPowers[1];
-        cloneToSpend.attackPower = playerUnitInitialAttackPower + targetAbilityPowers[2];
-        cloneToSpend.attackRange = playerUnitInitialAttackRange + targetAbilityPowers[3];
-        cloneToSpend.CreateCloneLook();
-        cloneToSpend.health = 0; // Hide health bar
+        gameGoal.maxHealth = playerUnitInitialMaxHealth + targetAbilityPowers[0];
+        gameGoal.moveRange = playerUnitInitialMoveRange + targetAbilityPowers[1];
+        gameGoal.attackPower = playerUnitInitialAttackPower + targetAbilityPowers[2];
+        gameGoal.attackRange = playerUnitInitialAttackRange + targetAbilityPowers[3];
+        gameGoal.CreateCloneLook();
+        gameGoal.health = 0; // Hide health bar
     }
 
     /// <summary>
@@ -103,10 +186,10 @@ public class GameManager : MonoBehaviour
     /// <returns></returns>
     public bool CheckWinCondition(PlayerUnit newClone)
     {
-        if (playerUnitEvolvedMaxHealth < cloneToSpend.maxHealth ||
-            playerUnitEvolvedMoveRange < cloneToSpend.moveRange ||
-            playerUnitEvolvedAttackPower < cloneToSpend.attackPower ||
-            playerUnitEvolvedAttackRange < cloneToSpend.attackRange)
+        if (playerUnitEvolvedMaxHealth < gameGoal.maxHealth ||
+            playerUnitEvolvedMoveRange < gameGoal.moveRange ||
+            playerUnitEvolvedAttackPower < gameGoal.attackPower ||
+            playerUnitEvolvedAttackRange < gameGoal.attackRange)
         {
             return false;
         }
@@ -120,6 +203,7 @@ public class GameManager : MonoBehaviour
     public void PlayerWin()
     {
         print("win");
+        winUI.SetActive(true);
     }
 
     /// <summary>
@@ -148,6 +232,12 @@ public class GameManager : MonoBehaviour
             {
                 playerTotalPower += (p.maxHealth + p.attackPower + p.attackRange + p.moveRange); // Add this unit's power
             }
+        }
+
+        // Zoom out camera
+        if (!cameraZoomedOut)
+        {
+            ZoomCamera();
         }
 
         // Generate a new level
@@ -230,5 +320,6 @@ public class GameManager : MonoBehaviour
     public void PlayerLose()
     {
         print("lose");
+        loseUI.SetActive(true);
     }
 }
