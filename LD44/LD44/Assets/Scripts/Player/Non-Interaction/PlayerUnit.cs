@@ -152,6 +152,7 @@ public class PlayerUnit : MonoBehaviour
         }
 
         TurnManager.inPlayerUnitAnimation = false; // Unit move animation finished
+        TurnManager.currentSelectedUnitTile = GetComponent<MapObjectInfo>().currentOccupyingTile; // Update selected unit tile
         TurnManager.sTurnManager.ShowRange(GetComponent<MapObjectInfo>().currentOccupyingTile, attackRange, false); // Show this unit's attack range
     }
 

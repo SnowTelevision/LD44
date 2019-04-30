@@ -96,7 +96,7 @@ public class GameManager : MonoBehaviour
         if (cameraZoomedOut)
         {
             cameraZoomedOut = false;
-            cameraTrans.Translate(-Vector3.up * cameraZoomInDistance);
+            cameraTrans.Translate(Vector3.forward * cameraZoomInDistance);
         }
         else
         {

@@ -159,7 +159,7 @@ public class EnemyManager : MonoBehaviour
             StartCoroutine(thisLevelEnemies[i].Act());
         }
 
-        TurnManager.sTurnManager.enemyTurnTip.SetActive(true); // Hide enemy turn UI tip
+        TurnManager.sTurnManager.enemyTurnTip.SetActive(false); // Hide enemy turn UI tip
         TurnManager.sTurnManager.StartNewRound(); // Start new round
     }
 
