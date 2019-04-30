@@ -201,7 +201,7 @@ public class MapManager : MonoBehaviour
 
             foreach (GridTileInfo NeighborNode in GetNeighboringNodes(CurrentNode))//Loop through each neighbor of the current node
             {
-                if (NeighborNode.isObstacle || NeighborNode.containingObject != null || ClosedList.Contains(NeighborNode))//If the neighbor is a wall or not empty or has already been checked
+                if (NeighborNode.isObstacle || (NeighborNode.containingObject != null && NeighborNode != end) || ClosedList.Contains(NeighborNode)) //If the neighbor is a wall or (not empty and not the end node) or has already been checked
                 {
                     continue;//Skip it
                 }

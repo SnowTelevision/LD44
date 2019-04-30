@@ -94,12 +94,12 @@ public class EnemyUnit : MonoBehaviour
         }
         else
         {
-            foreach (GridTileInfo t in moveRoute)
+            for (int i = 0; i < moveRange; i++)
             {
                 yield return new WaitForSeconds(animationInterval);
 
                 // Move unit for one tile
-                MapManager.PlaceObject(transform, t.xCoord, t.zCoord);
+                MapManager.PlaceObject(transform, moveRoute[i].xCoord, moveRoute[i].zCoord);
             }
         }
 
