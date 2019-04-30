@@ -56,6 +56,7 @@ public class PlayerUnit : MonoBehaviour
     public void InitiateClone()
     {
         isReproducing = false;
+        // GetComponent<MapObjectInfo>().currentOccupyingTile = 
 
         maxHealth = GameManager.playerUnitEvolvedMaxHealth;
         health = GameManager.playerUnitEvolvedMaxHealth;
@@ -108,14 +109,16 @@ public class PlayerUnit : MonoBehaviour
         yield return new WaitForSeconds(moveAnimationInterval);
 
         GameObject newClone = Instantiate(gameObject);
+        PlayerUnit newCloneUnit = newClone.GetComponent<PlayerUnit>();
+        newCloneUnit.GetComponent<MapObjectInfo>().currentOccupyingTile = null; // Reset new clone's MapObjectInfo's occupying tile info, because it has not been placed on the map yet
 
         // Place new clone on target tile
         MapManager.PlaceObject(newClone.transform, targetTile.xCoord, targetTile.zCoord);
 
-        newClone.GetComponent<PlayerUnit>().InitiateClone();
+        newCloneUnit.InitiateClone();
 
         // Add new clone to GameManager
-        GameManager.playerUnits.Add(newClone.GetComponent<PlayerUnit>());
+        GameManager.playerUnits.Add(newCloneUnit);
 
         // Clear selected tile in TurnManager;
         TurnManager.currentSelectedUnitTile = null;
@@ -123,7 +126,7 @@ public class PlayerUnit : MonoBehaviour
         yield return new WaitForSeconds(moveAnimationInterval);
 
         // If new clone meet the win requirement
-        if (GameManager.sGameManager.CheckWinCondition(newClone.GetComponent<PlayerUnit>()))
+        if (GameManager.sGameManager.CheckWinCondition(newCloneUnit))
         {
             GameManager.sGameManager.PlayerWin();
         }
