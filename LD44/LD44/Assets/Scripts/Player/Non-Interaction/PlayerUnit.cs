@@ -55,6 +55,8 @@ public class PlayerUnit : MonoBehaviour
 
     public void InitiateClone()
     {
+        isReproducing = false;
+
         maxHealth = GameManager.playerUnitEvolvedMaxHealth;
         health = GameManager.playerUnitEvolvedMaxHealth;
         moveRange = GameManager.playerUnitEvolvedMoveRange;
