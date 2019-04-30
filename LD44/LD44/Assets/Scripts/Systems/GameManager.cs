@@ -70,7 +70,7 @@ public class GameManager : MonoBehaviour
         // Move camera if not zoomed out
         if (!cameraZoomedOut)
         {
-            cameraTrans.Translate((Vector3.right * Input.GetAxis("Horizontal") + Vector3.forward * Input.GetAxis("Vertical")) * Time.deltaTime * cameraMoveSpeed); // Move camera
+            cameraTrans.Translate((Vector3.right * Input.GetAxis("Horizontal") + Vector3.up * Input.GetAxis("Vertical")) * Time.deltaTime * cameraMoveSpeed); // Move camera
         }
 
         // Zoom camera on RMB click
