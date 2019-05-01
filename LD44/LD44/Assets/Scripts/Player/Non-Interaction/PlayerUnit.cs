@@ -56,6 +56,7 @@ public class PlayerUnit : MonoBehaviour
     public void InitiateClone()
     {
         isReproducing = false;
+        hasMoved = false;
         // GetComponent<MapObjectInfo>().currentOccupyingTile = 
 
         maxHealth = GameManager.playerUnitEvolvedMaxHealth;
@@ -117,8 +118,8 @@ public class PlayerUnit : MonoBehaviour
 
         newCloneUnit.InitiateClone();
 
-        // Add new clone to GameManager
-        GameManager.playerUnits.Add(newCloneUnit);
+        // Add new clone to new clone list
+        TurnManager.newCloneReproduced.Add(newCloneUnit);
 
         // Clear selected tile in TurnManager;
         TurnManager.currentSelectedUnitTile = null;
@@ -128,6 +129,7 @@ public class PlayerUnit : MonoBehaviour
         // If new clone meet the win requirement
         if (GameManager.sGameManager.CheckWinCondition(newCloneUnit))
         {
+            //GameManager.playerUnits.Add(newCloneUnit);
             GameManager.sGameManager.PlayerWin();
         }
 

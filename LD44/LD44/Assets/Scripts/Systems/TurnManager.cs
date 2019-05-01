@@ -25,12 +25,14 @@ public class TurnManager : MonoBehaviour
     public static bool playerUnitAct; // Has the player moved a unit and should choose what the unit should do
     public static bool playerUnitReproducing; // Is a player's unit ready to reproduce
     public static GridTileInfo currentSelectedUnitTile; // The tile that the player is currently selected that has a player unit on it
+    public static List<PlayerUnit> newCloneReproduced; // The new player clones that's reproduced in the current reproduction phase
 
     public static TurnManager sTurnManager;
 
     private void OnEnable()
     {
         sTurnManager = this;
+        newCloneReproduced = new List<PlayerUnit>();
     }
 
     // Start is called before the first frame update
@@ -154,6 +156,15 @@ public class TurnManager : MonoBehaviour
 
         reproductionPhaseTip.SetActive(false); // Hide reproduction phase UI tip
 
+        // Copy new clones to player unit list in GameManager
+        foreach (PlayerUnit p in newCloneReproduced)
+        {
+            GameManager.playerUnits.Add(p);
+        }
+
+        // Clear new clone list
+        newCloneReproduced.Clear();
+
         // Make existing player units be able to move in the next turn
         foreach (PlayerUnit p in GameManager.playerUnits)
         {
@@ -199,6 +210,9 @@ public class TurnManager : MonoBehaviour
             // If the tile has a player unit
             if (hoverTile.containingObject != null && hoverTile.containingObject.GetComponent<PlayerUnit>())
             {
+                //// If the player unit can move
+                //if ()
+
                 hoverTile.marks[0].SetActive(true); // Highlight tile
             }
         }
@@ -354,7 +368,7 @@ public class TurnManager : MonoBehaviour
         playerUnitAct = false;
 
         // Check if finish turn
-        if (!GameManager.playerUnits.Exists(u => !u.hasMoved))
+        if (!GameManager.playerUnits.Exists(u => (!u.hasMoved || !u.isReproducing)))
         {
             PlayerFinishTurn();
         }
